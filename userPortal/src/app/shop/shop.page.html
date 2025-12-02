@@ -1,0 +1,82 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <ion-icon name="storefront" style="font-size: 24px;"></ion-icon>
+        <span>Points Shop</span>
+      </div>
+    </ion-title>
+    <ion-badge slot="end" color="warning" style="margin-right: 16px; font-size: 14px; padding: 8px 12px; border-radius: 20px;">
+      <ion-icon name="trophy" style="font-size: 14px; margin-right: 4px;"></ion-icon>
+      {{ userPoints }} Points
+    </ion-badge>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div *ngIf="loading" style="display: flex; justify-content: center; align-items: center; height: 100%;">
+    <ion-spinner></ion-spinner>
+  </div>
+
+  <ion-grid *ngIf="!loading">
+    <ion-row>
+      <ion-col size="12" size-md="6" size-lg="4" *ngFor="let item of shopItems">
+        <ion-card>
+          <div (click)="viewItemDetail(item)" style="cursor: pointer;">
+            <img *ngIf="item.imageUrl" [src]="item.imageUrl" alt="{{ item.name }}"
+                 style="height: 200px; object-fit: cover;"
+                 (error)="$any($event.target).src='https://via.placeholder.com/300x200?text=No+Image'" />
+            <img *ngIf="!item.imageUrl" src="https://via.placeholder.com/300x200?text={{ item.name }}"
+                 alt="{{ item.name }}" style="height: 200px; object-fit: cover;" />
+
+            <ion-card-header>
+              <ion-card-title>{{ item.name }}</ion-card-title>
+            </ion-card-header>
+
+            <ion-card-content>
+              <p>{{ item.description }}</p>
+              <div style="margin-top: 12px;">
+                <ion-badge color="success">{{ item.pointsRequired }} Points</ion-badge>
+                <ion-badge color="medium" style="margin-left: 8px;">Stock: {{ item.stock }}</ion-badge>
+              </div>
+            </ion-card-content>
+          </div>
+
+          <ion-card-content>
+            <ion-button
+              expand="block"
+              (click)="addToCart(item); $event.stopPropagation()"
+              [disabled]="!canAfford(item) || item.stock === 0"
+              style="margin-top: 12px;">
+              <ion-icon slot="start" name="add-circle"></ion-icon>
+              <span *ngIf="canAfford(item) && item.stock > 0">Add to Cart</span>
+              <span *ngIf="!canAfford(item) && item.stock > 0">Not Enough Points</span>
+              <span *ngIf="item.stock === 0">Out of Stock</span>
+            </ion-button>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+
+    <div *ngIf="shopItems.length === 0" style="text-align: center; padding: 40px;">
+      <ion-text color="medium">
+        <h2>No items available</h2>
+        <p>Please initialize shop data first!</p>
+        <p style="font-size: 14px; margin-top: 16px;">
+          Execute the SQL script at:<br>
+          <code style="background: #f0f0f0; padding: 4px 8px; border-radius: 4px;">
+            backend/init-shop-data.sql
+          </code>
+        </p>
+        <p style="font-size: 13px; color: #666; margin-top: 12px;">
+          This will add 20 fitness products including:<br>
+          护腕, 健身腰带, 护膝, 瑜伽垫, 蛋白粉 etc.
+        </p>
+      </ion-text>
+    </div>
+  </ion-grid>
+</ion-content>

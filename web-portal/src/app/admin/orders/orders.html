@@ -1,0 +1,154 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Orders Management</h1>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div *ngIf="message" class="message" [class.success]="messageType === 'success'" [class.error]="messageType === 'error'">
+    {{ message }}
+  </div>
+
+  <div class="table-container">
+    <table class="user-table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>User ID</th>
+          <th>Total Points</th>
+          <th>Status</th>
+          <th>Shipping Address</th>
+          <th>Created At</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let order of displayedOrders">
+          <tr>
+            <td>
+              <button class="btn-expand" (click)="toggleOrderItems(order.id)">
+                {{ isExpanded(order.id) ? '▼' : '▶' }}
+              </button>
+              {{ order.id }}
+            </td>
+            <td>{{ order.userId }}</td>
+            <td>{{ order.totalPoints }}</td>
+            <td>
+              <span class="status-badge" [class]="'status-' + order.status.toLowerCase()">
+                {{ order.status }}
+              </span>
+            </td>
+            <td>{{ order.shippingAddress }}</td>
+            <td>{{ formatDateTime(order.createdAt) }}</td>
+            <td>
+              <button class="btn-edit" (click)="openEditModal(order)">Edit</button>
+              <button class="btn-delete" (click)="deleteOrder(order)">Delete</button>
+            </td>
+          </tr>
+          <tr *ngIf="isExpanded(order.id)" class="expanded-row">
+            <td colspan="7">
+              <div class="order-items-container">
+                <h3>Order Items</h3>
+                <table class="order-items-table">
+                  <thead>
+                    <tr>
+                      <th>Shop Item ID</th>
+                      <th>Item Name</th>
+                      <th>Quantity</th>
+                      <th>Points Per Item</th>
+                      <th>Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let item of order.orderItems">
+                      <td>{{ item.shopItemId }}</td>
+                      <td>{{ item.shopItemName }}</td>
+                      <td>{{ item.quantity }}</td>
+                      <td>{{ item.pointsPerItem }}</td>
+                      <td>{{ item.quantity * item.pointsPerItem }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>
+        </ng-container>
+        <tr *ngIf="displayedOrders.length === 0">
+          <td colspan="7" class="no-data">No orders found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination" *ngIf="totalPages > 0">
+    <button
+      class="pagination-btn"
+      (click)="previousPage()"
+      [disabled]="currentPage === 1">
+      Previous
+    </button>
+
+    <div class="page-numbers">
+      <button
+        *ngFor="let page of pageNumbers"
+        class="page-btn"
+        [class.active]="page === currentPage"
+        (click)="goToPage(page)">
+        {{ page }}
+      </button>
+    </div>
+
+    <button
+      class="pagination-btn"
+      (click)="nextPage()"
+      [disabled]="currentPage === totalPages">
+      Next
+    </button>
+  </div>
+
+  <div class="pagination-info" *ngIf="totalItems > 0">
+    Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to
+    {{ Math.min(currentPage * itemsPerPage, totalItems) }} of
+    {{ totalItems }} orders
+  </div>
+</div>
+
+<!-- Modal for Edit -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Edit Order</h2>
+      <button class="modal-close" (click)="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form (ngSubmit)="saveOrder()">
+        <div class="form-group">
+          <label for="status">Status</label>
+          <select
+            id="status"
+            [(ngModel)]="currentOrder.status"
+            name="status"
+            required>
+            <option value="PENDING">PENDING</option>
+            <option value="PROCESSING">PROCESSING</option>
+            <option value="SHIPPED">SHIPPED</option>
+            <option value="DELIVERED">DELIVERED</option>
+            <option value="CANCELLED">CANCELLED</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="shippingAddress">Shipping Address</label>
+          <textarea
+            id="shippingAddress"
+            [(ngModel)]="currentOrder.shippingAddress"
+            name="shippingAddress"
+            rows="3"
+            required></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="closeModal()">Cancel</button>
+          <button type="submit" class="btn-save">Update</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

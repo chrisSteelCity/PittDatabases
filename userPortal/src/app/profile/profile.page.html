@@ -1,0 +1,147 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <ion-icon name="person-circle" style="font-size: 24px;"></ion-icon>
+        <span>Profile</span>
+      </div>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div *ngIf="loading" style="display: flex; justify-content: center; align-items: center; height: 100%;">
+    <ion-spinner></ion-spinner>
+  </div>
+
+  <div *ngIf="!loading && profile" style="padding: 16px;">
+    <!-- User Info Card -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="person-outline"></ion-icon>
+          User Information
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item>
+            <ion-label>
+              <h3>Username</h3>
+              <p>{{ profile.username }}</p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>
+              <h3>User ID</h3>
+              <p>{{ profile.id }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Points Card -->
+    <ion-card style="background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);">
+      <ion-card-header>
+        <ion-card-title style="color: #333; display: flex; align-items: center; gap: 8px;">
+          <ion-icon name="trophy" style="font-size: 24px;"></ion-icon>
+          <span>Points Balance</span>
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div style="text-align: center; padding: 20px 0;">
+          <div style="font-size: 56px; font-weight: 700; color: #333; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            {{ profile.points }}
+          </div>
+          <p style="color: #555; margin-top: 8px; font-weight: 500;">Available Points</p>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Check-in Card -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="calendar-outline"></ion-icon>
+          Daily Check-in
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p *ngIf="profile.lastCheckinDate">
+          Last check-in: {{ profile.lastCheckinDate }}
+        </p>
+        <p *ngIf="!profile.lastCheckinDate" style="color: #666;">
+          You haven't checked in yet!
+        </p>
+
+        <ion-button
+          expand="block"
+          (click)="checkin()"
+          [disabled]="!canCheckinToday"
+          color="success"
+          style="margin-top: 12px;">
+          <ion-icon slot="start" name="checkmark-circle"></ion-icon>
+          <span *ngIf="canCheckinToday">Check in (+20 points)</span>
+          <span *ngIf="!canCheckinToday">Already checked in today</span>
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Address Card -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="location-outline"></ion-icon>
+          Shipping Address
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div *ngIf="!editingAddress">
+          <p *ngIf="profile.address">{{ profile.address }}</p>
+          <p *ngIf="!profile.address" style="color: #999; font-style: italic;">
+            No address set
+          </p>
+          <ion-button expand="block" (click)="startEditAddress()" style="margin-top: 12px;">
+            {{ profile.address ? 'Edit Address' : 'Add Address' }}
+          </ion-button>
+        </div>
+
+        <div *ngIf="editingAddress">
+          <ion-item>
+            <ion-label position="stacked">Address</ion-label>
+            <ion-input
+              [(ngModel)]="newAddress"
+              placeholder="Enter your shipping address"
+              type="text">
+            </ion-input>
+          </ion-item>
+
+          <div style="display: flex; gap: 8px; margin-top: 12px;">
+            <ion-button expand="block" (click)="saveAddress()" color="primary">
+              Save
+            </ion-button>
+            <ion-button expand="block" (click)="cancelEditAddress()" color="medium" fill="outline">
+              Cancel
+            </ion-button>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Logout Card -->
+    <ion-card>
+      <ion-card-content>
+        <ion-button expand="block" color="danger" (click)="logout()">
+          <ion-icon slot="start" name="log-out-outline"></ion-icon>
+          Logout
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

@@ -1,0 +1,76 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>User Dashboard</h1>
+  </div>
+
+  <div class="table-container">
+    <table class="user-table">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Alert</th>
+          <th>Last Report Time</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of displayedUsers">
+          <td>{{ user.username }}</td>
+          <td>
+            <!-- Show alert if more than 2 days since last report -->
+            <span *ngIf="user.alert" class="alert-badge alert-active">
+              ⚠️ {{ user.daysSinceReport }} {{ user.daysSinceReport === 1 ? 'day' : 'days' }}
+            </span>
+            <!-- Show "Up to date" if not alert and has reports -->
+            <span *ngIf="!user.alert && user.daysSinceReport !== -1" class="alert-badge alert-uptodate">
+              ✅ Up to date
+            </span>
+            <!-- Show "No reports" if never reported -->
+            <span *ngIf="user.daysSinceReport === -1" class="alert-badge alert-no-reports">
+              No reports
+            </span>
+          </td>
+          <td>{{ user.lastReportTime }}</td>
+          <td>
+            <button class="btn-view" (click)="viewUser(user)">view</button>
+          </td>
+        </tr>
+        <tr *ngIf="displayedUsers.length === 0">
+          <td colspan="4" class="no-data">No users found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination" *ngIf="totalPages > 0">
+    <button
+      class="pagination-btn"
+      (click)="previousPage()"
+      [disabled]="currentPage === 1">
+      Previous
+    </button>
+
+    <div class="page-numbers">
+      <button
+        *ngFor="let page of pageNumbers"
+        class="page-btn"
+        [class.active]="page === currentPage"
+        (click)="goToPage(page)">
+        {{ page }}
+      </button>
+    </div>
+
+    <button
+      class="pagination-btn"
+      (click)="nextPage()"
+      [disabled]="currentPage === totalPages">
+      Next
+    </button>
+  </div>
+
+  <div class="pagination-info" *ngIf="totalItems > 0">
+    Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to
+    {{ Math.min(currentPage * itemsPerPage, totalItems) }} of
+    {{ totalItems }} users
+  </div>
+</div>

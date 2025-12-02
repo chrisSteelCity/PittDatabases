@@ -1,0 +1,101 @@
+<ion-content class="login-container" [fullscreen]="true">
+  <div class="center-wrapper">
+    <div class="login-card">
+      <!-- Logo/Title -->
+      <div class="login-header">
+        <h1>{{ isLoginMode ? 'Login to Exercise Tracker' : 'Register to Exercise Tracker' }}</h1>
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Login Form -->
+      <form *ngIf="isLoginMode" class="login-form" (ngSubmit)="onLogin()">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            [(ngModel)]="username"
+            placeholder="Enter your username"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            [(ngModel)]="password"
+            placeholder="Enter your password"
+            required
+          />
+        </div>
+
+        <button type="submit" class="btn-primary" [disabled]="isLoading">
+          {{ isLoading ? 'Logging in...' : 'Login' }}
+        </button>
+
+        <div class="toggle-text">
+          <p>Don't have an account?
+            <a (click)="toggleMode()" class="link">Register</a>
+          </p>
+        </div>
+      </form>
+
+      <!-- Register Form -->
+      <form *ngIf="!isLoginMode" class="login-form" (ngSubmit)="onRegister()">
+        <div class="form-group">
+          <label for="reg-username">Username</label>
+          <input
+            type="text"
+            id="reg-username"
+            name="username"
+            [(ngModel)]="username"
+            placeholder="Choose a username"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="reg-password">Password</label>
+          <input
+            type="password"
+            id="reg-password"
+            name="password"
+            [(ngModel)]="password"
+            placeholder="Choose a password"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="confirm-password">Confirm Password</label>
+          <input
+            type="password"
+            id="confirm-password"
+            name="confirmPassword"
+            [(ngModel)]="confirmPassword"
+            placeholder="Confirm your password"
+            required
+          />
+        </div>
+
+        <button type="submit" class="btn-primary" [disabled]="isLoading">
+          {{ isLoading ? 'Registering...' : 'Register' }}
+        </button>
+
+        <div class="toggle-text">
+          <p>Already have an account?
+            <a (click)="toggleMode()" class="link">Login</a>
+          </p>
+        </div>
+      </form>
+    </div>
+  </div>
+</ion-content>

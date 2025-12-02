@@ -1,0 +1,119 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Users Management</h1>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div *ngIf="message" class="message" [class.success]="messageType === 'success'" [class.error]="messageType === 'error'">
+    {{ message }}
+  </div>
+
+  <div class="table-container">
+    <table class="user-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Username</th>
+          <th>Points</th>
+          <th>Address</th>
+          <th>Last Checkin Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of displayedUsers">
+          <td>{{ user.id }}</td>
+          <td>{{ user.username }}</td>
+          <td>{{ user.points }}</td>
+          <td>{{ user.address }}</td>
+          <td>{{ formatDateTime(user.lastCheckinDate) }}</td>
+          <td>
+            <button class="btn-edit" (click)="openEditModal(user)">Edit</button>
+            <button class="btn-delete" (click)="deleteUser(user)">Delete</button>
+          </td>
+        </tr>
+        <tr *ngIf="displayedUsers.length === 0">
+          <td colspan="6" class="no-data">No users found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination" *ngIf="totalPages > 0">
+    <button
+      class="pagination-btn"
+      (click)="previousPage()"
+      [disabled]="currentPage === 1">
+      Previous
+    </button>
+
+    <div class="page-numbers">
+      <button
+        *ngFor="let page of pageNumbers"
+        class="page-btn"
+        [class.active]="page === currentPage"
+        (click)="goToPage(page)">
+        {{ page }}
+      </button>
+    </div>
+
+    <button
+      class="pagination-btn"
+      (click)="nextPage()"
+      [disabled]="currentPage === totalPages">
+      Next
+    </button>
+  </div>
+
+  <div class="pagination-info" *ngIf="totalItems > 0">
+    Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to
+    {{ Math.min(currentPage * itemsPerPage, totalItems) }} of
+    {{ totalItems }} users
+  </div>
+</div>
+
+<!-- Modal for Edit -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Edit User</h2>
+      <button class="modal-close" (click)="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form (ngSubmit)="saveUser()">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input
+            type="text"
+            id="username"
+            [(ngModel)]="currentUser.username"
+            name="username"
+            required>
+        </div>
+        <div class="form-group">
+          <label for="points">Points</label>
+          <input
+            type="number"
+            id="points"
+            [(ngModel)]="currentUser.points"
+            name="points"
+            min="0"
+            required>
+        </div>
+        <div class="form-group">
+          <label for="address">Address</label>
+          <textarea
+            id="address"
+            [(ngModel)]="currentUser.address"
+            name="address"
+            rows="3"
+            required></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="closeModal()">Cancel</button>
+          <button type="submit" class="btn-save">Update</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

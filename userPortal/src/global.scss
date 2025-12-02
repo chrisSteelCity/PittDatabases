@@ -1,0 +1,161 @@
+/*
+ * App Global CSS
+ * ----------------------------------------------------------------------------
+ * Put style rules here that you want to apply globally. These styles are for
+ * the entire app and not just one component. Additionally, this file can be
+ * used as an entry point to import other CSS/Sass files to be included in the
+ * output CSS.
+ * For more information on global stylesheets, visit the documentation:
+ * https://ionicframework.com/docs/layout/global-stylesheets
+ */
+
+/* Core CSS required for Ionic components to work properly */
+@import "@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+
+/* Optional CSS utils that can be commented out */
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+/**
+ * Ionic Dark Mode
+ * -----------------------------------------------------
+ * For more info, please see:
+ * https://ionicframework.com/docs/theming/dark-mode
+ */
+
+/* @import "@ionic/angular/css/palettes/dark.always.css"; */
+/* @import "@ionic/angular/css/palettes/dark.class.css"; */
+@import '@ionic/angular/css/palettes/dark.system.css';
+
+/**
+ * Modern Theme - Soft Edges & Consistent Styling
+ * -----------------------------------------------------
+ */
+
+:root {
+  --border-radius-sm: 8px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 16px;
+  --border-radius-xl: 20px;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+}
+
+/* Modern Card Styling */
+ion-card {
+  border-radius: var(--border-radius-lg) !important;
+  box-shadow: var(--shadow-md) !important;
+  margin: var(--spacing-md) !important;
+  overflow: hidden;
+}
+
+ion-card-header {
+  padding: var(--spacing-md) var(--spacing-lg) !important;
+}
+
+ion-card-content {
+  padding: var(--spacing-lg) !important;
+}
+
+/* Modern Button Styling */
+ion-button {
+  --border-radius: var(--border-radius-md);
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0.3px;
+  height: 44px;
+}
+
+ion-button::part(native) {
+  border-radius: var(--border-radius-md);
+}
+
+/* Modern Input/Textarea Styling */
+ion-input,
+ion-textarea,
+ion-select {
+  --border-radius: var(--border-radius-md);
+  --padding-start: var(--spacing-md);
+  --padding-end: var(--spacing-md);
+}
+
+ion-item {
+  --border-radius: var(--border-radius-md);
+  --inner-padding-end: var(--spacing-md);
+  --padding-start: var(--spacing-md);
+}
+
+/* Modern Badge Styling */
+ion-badge {
+  border-radius: var(--border-radius-xl);
+  padding: 6px 12px;
+  font-weight: 500;
+}
+
+/* Smooth Transitions */
+ion-card,
+ion-button,
+ion-item,
+ion-badge {
+  transition: all 0.3s ease;
+}
+
+ion-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg) !important;
+}
+
+/* Modern List Styling */
+ion-list {
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+}
+
+/* Toolbar Modernization */
+ion-toolbar {
+  --min-height: 56px;
+  padding: 0 var(--spacing-sm);
+}
+
+/* Soft Content Background */
+ion-content {
+  --background: #f8f9fa;
+}
+
+/* Modern Modal/Alert Styling */
+ion-modal,
+ion-alert {
+  --border-radius: var(--border-radius-xl);
+}
+
+/* Improved Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+
+ion-card-title {
+  font-weight: 600 !important;
+  letter-spacing: -0.3px;
+}
+
+/* Modern Spinner */
+ion-spinner {
+  width: 48px;
+  height: 48px;
+}

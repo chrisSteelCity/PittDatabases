@@ -1,0 +1,90 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <ion-icon name="cart" style="font-size: 24px;"></ion-icon>
+        <span>Shopping Cart</span>
+      </div>
+    </ion-title>
+    <ion-badge slot="end" color="warning" style="margin-right: 16px; font-size: 14px; padding: 8px 12px; border-radius: 20px;">
+      <ion-icon name="trophy" style="font-size: 14px; margin-right: 4px;"></ion-icon>
+      {{ userPoints }} Points
+    </ion-badge>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div *ngIf="loading" style="display: flex; justify-content: center; align-items: center; height: 100%;">
+    <ion-spinner></ion-spinner>
+  </div>
+
+  <div *ngIf="!loading && cartItems.length === 0" style="text-align: center; padding: 60px 40px;">
+    <ion-icon name="cart-outline" style="font-size: 100px; color: #ddd; margin-bottom: 20px;"></ion-icon>
+    <h2 style="color: #666; font-size: 20px; margin-bottom: 12px;">Your cart is empty</h2>
+    <p style="color: #999; font-size: 14px;">Check out the shop for great items!</p>
+  </div>
+
+  <ion-list *ngIf="!loading && cartItems.length > 0">
+    <ion-item *ngFor="let item of cartItems">
+      <img *ngIf="item.imageUrl"
+           [src]="item.imageUrl"
+           alt="{{ item.shopItemName }}"
+           slot="start"
+           style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;"
+           (error)="$any($event.target).src='https://via.placeholder.com/60?text=No+Image'" />
+      <img *ngIf="!item.imageUrl"
+           src="https://via.placeholder.com/60?text={{ item.shopItemName.charAt(0) }}"
+           alt="{{ item.shopItemName }}"
+           slot="start"
+           style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;" />
+
+      <ion-label>
+        <h2>{{ item.shopItemName }}</h2>
+        <p>{{ item.pointsRequired }} points each</p>
+        <div style="display: flex; align-items: center; margin-top: 8px;">
+          <ion-button size="small" fill="clear" (click)="decreaseQuantity(item)">
+            <ion-icon slot="icon-only" name="remove-circle"></ion-icon>
+          </ion-button>
+          <span style="margin: 0 12px; font-weight: bold;">{{ item.quantity }}</span>
+          <ion-button size="small" fill="clear" (click)="increaseQuantity(item)">
+            <ion-icon slot="icon-only" name="add-circle"></ion-icon>
+          </ion-button>
+        </div>
+      </ion-label>
+
+      <ion-text slot="end" style="text-align: right;">
+        <div style="font-weight: bold; color: var(--ion-color-primary);">
+          {{ item.pointsRequired * item.quantity }} pts
+        </div>
+        <ion-button size="small" fill="clear" color="danger" (click)="removeItem(item)" style="margin-top: 4px;">
+          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+        </ion-button>
+      </ion-text>
+    </ion-item>
+  </ion-list>
+
+  <ion-card *ngIf="!loading && cartItems.length > 0" style="margin: 16px;">
+    <ion-card-content>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h2 style="margin: 0;">Total:</h2>
+        <h2 style="margin: 0; color: var(--ion-color-primary);">{{ getTotalPoints() }} Points</h2>
+      </div>
+
+      <ion-button
+        expand="block"
+        (click)="checkout()"
+        [disabled]="getTotalPoints() > userPoints">
+        <span *ngIf="getTotalPoints() <= userPoints">Checkout</span>
+        <span *ngIf="getTotalPoints() > userPoints">Insufficient Points</span>
+      </ion-button>
+
+      <p *ngIf="getTotalPoints() > userPoints" style="text-align: center; color: var(--ion-color-danger); margin-top: 8px;">
+        You need {{ getTotalPoints() - userPoints }} more points
+      </p>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

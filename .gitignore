@@ -1,0 +1,42 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/usage.statistics.xml
+.idea/dictionaries
+.idea/shelf/
+.idea/easycode/
+.idea/easycode.ignore
+.vscode/
+
+# Logs
+logs/
+*.log
+
+# Node modules (will be installed via npm install)
+node_modules/
+package-lock.json
+
+# Build outputs
+dist/
+build/
+target/
+
+# Environment files (may contain sensitive data)
+.env
+.env.local
+
+# Testing
+coverage/
+.nyc_output/
+
+# Misc
+*.swp
+*.swo
+*~
+.tmp/
+temp/

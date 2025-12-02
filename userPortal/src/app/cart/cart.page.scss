@@ -1,0 +1,9 @@
+ion-item {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  margin-bottom: 8px;
+}
+
+ion-button[disabled] {
+  opacity: 0.5;
+}

@@ -1,0 +1,495 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <ion-icon name="add-circle" style="font-size: 24px;"></ion-icon>
+        <span>Add Exercise</span>
+      </div>
+    </ion-title>
+  </ion-toolbar>
+  <ion-toolbar>
+    <div style="padding: 8px 16px; display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <ion-icon name="person-circle" style="font-size: 24px; color: var(--ion-color-primary);"></ion-icon>
+        <span style="font-weight: 500;">{{ username }}</span>
+      </div>
+      <ion-select
+        [(ngModel)]="selectedTimezone"
+        (ionChange)="onTimezoneChange()"
+        interface="popover"
+        placeholder="Timezone"
+        style="max-width: 180px; font-size: 13px;">
+        <ion-select-option *ngFor="let tz of timezones" [value]="tz.value">
+          {{ tz.label }}
+        </ion-select-option>
+      </ion-select>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- Add Exercise Form -->
+  <ion-card style="box-shadow: 0 4px 16px rgba(0,0,0,0.12); border-radius: 16px; overflow: hidden;">
+    <ion-card-header style="background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-primary-shade) 100%); color: white;">
+      <ion-card-title style="display: flex; align-items: center; gap: 8px; font-size: 20px;">
+        <ion-icon name="fitness-outline" style="font-size: 28px;"></ion-icon>
+        <span>New Exercise</span>
+      </ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content style="padding: 20px;">
+
+      <!-- 1. Exercise Type (点击展开选项) -->
+      <ion-item button="true" detail="false" (click)="toggleTypeSelector()">
+        <ion-label position="stacked">Exercise Type *</ion-label>
+        <ion-text color="dark">
+          <h2>{{ type }}</h2>
+        </ion-text>
+        <ion-icon
+          slot="end"
+          [name]="showTypeOptions ? 'chevron-up' : 'chevron-down'"
+          color="medium">
+        </ion-icon>
+      </ion-item>
+
+      <!-- 展开的选项列表 -->
+      <div class="type-options-container" *ngIf="showTypeOptions">
+        <ion-list class="type-options-list">
+          <ion-item
+            *ngFor="let t of exerciseTypes"
+            button
+            (click)="selectType(t)"
+            [detail]="false"
+            class="type-option-item">
+            <ion-label>{{ t }}</ion-label>
+            <ion-icon
+              *ngIf="type === t"
+              name="checkmark-circle"
+              color="primary"
+              slot="end">
+            </ion-icon>
+          </ion-item>
+        </ion-list>
+      </div>
+
+      <!-- 2. Duration (数字输入，单位 min) -->
+      <ion-item class="ion-margin-top">
+        <ion-input
+          label="Duration (min) *"
+          label-placement="floating"
+          type="number"
+          min="1"
+          placeholder="Enter duration in minutes"
+          [(ngModel)]="duration">
+        </ion-input>
+      </ion-item>
+
+      <!-- 3. Date & Time (点击弹出日历) -->
+      <ion-item id="date-trigger" class="ion-margin-top" button detail>
+        <ion-label position="stacked">Date & Time *</ion-label>
+        <ion-text color="dark">
+          <p>{{ when | date:'yyyy/MM/dd HH:mm' }}</p>
+        </ion-text>
+      </ion-item>
+
+      <!-- 4. Location (点击弹出选择) -->
+      <ion-item button="true" detail="false" (click)="openLocationModal()" class="ion-margin-top">
+        <ion-label position="stacked">Location *</ion-label>
+        <ion-text color="dark">
+          <h2>{{ location === 'inside' ? 'Inside' : 'Outside' }}</h2>
+        </ion-text>
+      </ion-item>
+
+      <!-- 保存按钮 -->
+      <ion-button
+        expand="block"
+        class="ion-margin-top"
+        (click)="save()"
+        style="height: 48px; font-size: 16px; font-weight: 600; --border-radius: 12px;">
+        <ion-icon slot="start" name="checkmark-circle"></ion-icon>
+        Save Exercise
+      </ion-button>
+
+      <!-- 重置按钮 -->
+      <ion-button
+        expand="block"
+        fill="outline"
+        color="medium"
+        (click)="resetForm()"
+        style="height: 44px; font-weight: 600; --border-radius: 12px;">
+        <ion-icon slot="start" name="refresh-outline"></ion-icon>
+        Reset
+      </ion-button>
+
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Today's Activity -->
+  <ion-card class="ion-margin-top" style="box-shadow: 0 4px 16px rgba(0,0,0,0.12); border-radius: 16px; overflow: hidden;">
+    <ion-card-header style="background: var(--ion-color-light); border-bottom: 2px solid var(--ion-color-primary);">
+      <ion-card-title style="display: flex; align-items: center; gap: 8px; color: var(--ion-color-primary);">
+        <ion-icon name="stats-chart" style="font-size: 24px;"></ion-icon>
+        <span>Today's Activity</span>
+      </ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+      <!-- 没有记录时的提示 -->
+      <div *ngIf="records.length === 0" class="no-records">
+        <p>No records yet. Add your first exercise above!</p>
+      </div>
+
+      <!-- 记录列表 -->
+      <ion-list *ngIf="records.length > 0">
+        <ion-item *ngFor="let record of records; let i = index" lines="full">
+          <ion-label>
+            <h2>
+              <ion-icon
+                [name]="getExerciseIconName(record.type)"
+                style="vertical-align: middle; margin-right: 8px;">
+              </ion-icon>
+              <strong>{{ record.type }}</strong>
+            </h2>
+            <p>
+              <ion-text color="medium">
+                <ion-icon name="time-outline" style="vertical-align: middle;"></ion-icon>
+                Duration: {{ record.duration }} minutes
+              </ion-text>
+            </p>
+            <p>
+              <ion-text color="medium">
+                <ion-icon name="calendar-outline" style="vertical-align: middle;"></ion-icon>
+                {{ formatRecordDateTime(record) }}
+              </ion-text>
+            </p>
+            <p>
+              <ion-text color="medium">
+                <ion-icon
+                  [name]="record.location === 'inside' ? 'home-outline' : 'sunny-outline'"
+                  style="vertical-align: middle;">
+                </ion-icon>
+                {{ record.location === 'inside' ? 'Inside' : 'Outside' }}
+              </ion-text>
+            </p>
+            <p>
+              <ion-text color="primary" style="font-size: 0.9em;">
+                <ion-icon name="globe-outline" style="vertical-align: middle;"></ion-icon>
+                Zone: {{ getTimezoneLabel(record.timezone) }}
+              </ion-text>
+            </p>
+          </ion-label>
+          <ion-button slot="end" fill="clear" (click)="viewRecord(i)">
+            <ion-icon name="create-outline"></ion-icon>
+          </ion-button>
+          <ion-button slot="end" fill="clear" color="danger" (click)="deleteRecord(i)">
+            <ion-icon name="trash-outline"></ion-icon>
+          </ion-button>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Date & Time Picker Modal -->
+  <ion-modal
+    #dateSheet
+    trigger="date-trigger"
+    (willPresent)="onDateModalWillPresent()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Select Date & Time</ion-title>
+          <ion-buttons slot="start">
+            <ion-button (click)="dateSheet.dismiss()">Cancel</ion-button>
+          </ion-buttons>
+          <ion-buttons slot="end">
+            <ion-button strong (click)="confirmDatePicker(); dateSheet.dismiss()">OK</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding">
+        <!-- 当前选择的日期时间显示 -->
+        <div class="datetime-preview">
+          <ion-text color="medium">
+            <p class="preview-label">Selected Date & Time</p>
+          </ion-text>
+          <ion-text color="dark">
+            <h2 class="preview-value">{{ tempWhen | date:'EEEE, MMM d, yyyy • HH:mm' }}</h2>
+          </ion-text>
+        </div>
+
+        <!-- 快捷按钮 -->
+        <div class="quick-actions">
+          <ion-button
+            fill="outline"
+            size="small"
+            (click)="setToNow()">
+            <ion-icon slot="start" name="time-outline"></ion-icon>
+            Now
+          </ion-button>
+        </div>
+
+        <!-- 手动输入区域 -->
+        <div class="manual-inputs">
+          <h3 class="input-title">Enter Date & Time</h3>
+
+          <div class="datetime-inputs-grid">
+            <ion-item class="datetime-input-item">
+              <ion-input
+                label="Date"
+                label-placement="stacked"
+                type="date"
+                [max]="maxDateString"
+                [(ngModel)]="tempDate"
+                (ionChange)="onManualInputChange()">
+              </ion-input>
+            </ion-item>
+
+            <ion-item class="datetime-input-item">
+              <ion-input
+                label="Time"
+                label-placement="stacked"
+                type="time"
+                [(ngModel)]="tempTime"
+                (ionChange)="onManualInputChange()">
+              </ion-input>
+            </ion-item>
+          </div>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <!-- Location Selector Modal -->
+  <ion-modal [isOpen]="showLocationModal" (didDismiss)="showLocationModal = false">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Exercise Location</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="showLocationModal = false">Cancel</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding">
+        <!-- 问题标题 -->
+        <div class="location-question">
+          <h2>Did you finish an indoor or outdoor exercise?</h2>
+        </div>
+
+        <!-- 选项卡片 -->
+        <ion-grid>
+          <ion-row>
+            <ion-col size="6">
+              <ion-card
+                button="true"
+                (click)="selectLocation('inside')"
+                [color]="location === 'inside' ? 'primary' : 'light'"
+                class="location-card">
+                <ion-card-content class="ion-text-center">
+                  <ion-icon
+                    name="home-outline"
+                    size="large"
+                    [color]="location === 'inside' ? 'light' : 'medium'">
+                  </ion-icon>
+                  <h3 [style.color]="location === 'inside' ? 'white' : 'inherit'">Inside</h3>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+
+            <ion-col size="6">
+              <ion-card
+                button="true"
+                (click)="selectLocation('outside')"
+                [color]="location === 'outside' ? 'primary' : 'light'"
+                class="location-card">
+                <ion-card-content class="ion-text-center">
+                  <ion-icon
+                    name="sunny-outline"
+                    size="large"
+                    [color]="location === 'outside' ? 'light' : 'medium'">
+                  </ion-icon>
+                  <h3 [style.color]="location === 'outside' ? 'white' : 'inherit'">Outside</h3>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <!-- View/Edit Record Modal -->
+  <ion-modal [isOpen]="showViewModal" (didDismiss)="showViewModal = false; originalEditRecord = null">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>View Exercise</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeEditModal()">Cancel</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding">
+        <ion-card>
+          <ion-card-content>
+
+            <!-- 1. Exercise Type -->
+            <ion-item button="true" detail="false" (click)="toggleEditTypeSelector()">
+              <ion-label position="stacked">Exercise Type *</ion-label>
+              <ion-text color="dark">
+                <h2>{{ editType }}</h2>
+              </ion-text>
+              <ion-icon
+                slot="end"
+                [name]="showEditTypeOptions ? 'chevron-up' : 'chevron-down'"
+                color="medium">
+              </ion-icon>
+            </ion-item>
+
+            <!-- 展开的选项列表 -->
+            <div class="type-options-container" *ngIf="showEditTypeOptions">
+              <ion-list class="type-options-list">
+                <ion-item
+                  *ngFor="let t of exerciseTypes"
+                  button
+                  (click)="selectEditType(t)"
+                  [detail]="false"
+                  class="type-option-item">
+                  <ion-label>{{ t }}</ion-label>
+                  <ion-icon
+                    *ngIf="editType === t"
+                    name="checkmark-circle"
+                    color="primary"
+                    slot="end">
+                  </ion-icon>
+                </ion-item>
+              </ion-list>
+            </div>
+
+            <!-- 2. Duration -->
+            <ion-item class="ion-margin-top">
+              <ion-input
+                label="Duration (min) *"
+                label-placement="floating"
+                type="number"
+                min="1"
+                placeholder="Enter duration in minutes"
+                [(ngModel)]="editDuration">
+              </ion-input>
+            </ion-item>
+
+            <!-- 3. Date & Time (可编辑，但日期不能超过今天) -->
+            <ion-item class="ion-margin-top">
+              <ion-input
+                label="Date *"
+                label-placement="stacked"
+                type="date"
+                [max]="maxDateString"
+                [(ngModel)]="editTempDate"
+                (ionChange)="onEditDateTimeChange()">
+              </ion-input>
+            </ion-item>
+
+            <ion-item class="ion-margin-top">
+              <ion-input
+                label="Time *"
+                label-placement="stacked"
+                type="time"
+                [(ngModel)]="editTempTime"
+                (ionChange)="onEditDateTimeChange()">
+              </ion-input>
+            </ion-item>
+
+            <!-- Timezone (Read-only) -->
+            <ion-item class="ion-margin-top">
+              <ion-label position="stacked">Zone</ion-label>
+              <ion-text color="medium">
+                <p style="margin-top: 8px;">{{ getTimezoneLabel(editTimezone) }}</p>
+              </ion-text>
+            </ion-item>
+
+            <!-- 4. Location -->
+            <ion-item button="true" detail="false" (click)="openEditLocationModal()" class="ion-margin-top">
+              <ion-label position="stacked">Location *</ion-label>
+              <ion-text color="dark">
+                <h2>{{ editLocation === 'inside' ? 'Inside' : 'Outside' }}</h2>
+              </ion-text>
+            </ion-item>
+
+            <!-- 确认按钮 -->
+            <ion-button
+              expand="block"
+              class="ion-margin-top"
+              (click)="saveEdit()">
+              Confirm
+            </ion-button>
+
+          </ion-card-content>
+        </ion-card>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <!-- Edit Location Selector Modal -->
+  <ion-modal [isOpen]="showEditLocationModal" (didDismiss)="showEditLocationModal = false">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Exercise Location</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="showEditLocationModal = false">Cancel</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding">
+        <div class="location-question">
+          <h2>Did you finish an indoor or outdoor exercise?</h2>
+        </div>
+
+        <ion-grid>
+          <ion-row>
+            <ion-col size="6">
+              <ion-card
+                button="true"
+                (click)="selectEditLocation('inside')"
+                [color]="editLocation === 'inside' ? 'primary' : 'light'"
+                class="location-card">
+                <ion-card-content class="ion-text-center">
+                  <ion-icon
+                    name="home-outline"
+                    size="large"
+                    [color]="editLocation === 'inside' ? 'light' : 'medium'">
+                  </ion-icon>
+                  <h3 [style.color]="editLocation === 'inside' ? 'white' : 'inherit'">Inside</h3>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+
+            <ion-col size="6">
+              <ion-card
+                button="true"
+                (click)="selectEditLocation('outside')"
+                [color]="editLocation === 'outside' ? 'primary' : 'light'"
+                class="location-card">
+                <ion-card-content class="ion-text-center">
+                  <ion-icon
+                    name="sunny-outline"
+                    size="large"
+                    [color]="editLocation === 'outside' ? 'light' : 'medium'">
+                  </ion-icon>
+                  <h3 [style.color]="editLocation === 'outside' ? 'white' : 'inherit'">Outside</h3>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+</ion-content>

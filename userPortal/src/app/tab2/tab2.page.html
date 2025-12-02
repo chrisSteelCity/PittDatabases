@@ -1,0 +1,134 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      Exercise History
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<!-- Current Viewing Timezone Display -->
+<ion-toolbar color="light">
+  <ion-title size="small" class="ion-text-center">
+    <ion-icon name="time-outline" style="vertical-align: middle;"></ion-icon>
+    Viewing in: {{ selectedTimezone }} ({{ getTimezoneAbbreviation() }})
+  </ion-title>
+</ion-toolbar>
+
+<ion-content class="ion-padding">
+  <!-- Exercise Report Card -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Exercise Activity Report</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <!-- Time Period Selector -->
+      <div style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
+        <ion-button
+          size="small"
+          [fill]="selectedPeriod === '7days' ? 'solid' : 'outline'"
+          (click)="changePeriod('7days')">
+          Last 7 Days
+        </ion-button>
+        <ion-button
+          size="small"
+          [fill]="selectedPeriod === 'month' ? 'solid' : 'outline'"
+          (click)="changePeriod('month')">
+          Last Month
+        </ion-button>
+        <ion-button
+          size="small"
+          [fill]="selectedPeriod === '6months' ? 'solid' : 'outline'"
+          (click)="changePeriod('6months')">
+          Last 6 Months
+        </ion-button>
+        <ion-button
+          size="small"
+          [fill]="selectedPeriod === 'year' ? 'solid' : 'outline'"
+          (click)="changePeriod('year')">
+          Last Year
+        </ion-button>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="loadingReport" class="ion-text-center">
+        <ion-spinner></ion-spinner>
+        <p>Loading report data...</p>
+      </div>
+
+      <!-- Chart Container -->
+      <div *ngIf="!loadingReport && past7DaysData.length > 0">
+        <canvas id="exerciseChart" #exerciseChart style="width: 100%; height: 300px;"></canvas>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!loadingReport && past7DaysData.length === 0" class="ion-text-center">
+        <ion-icon name="bar-chart-outline" style="font-size: 64px; color: var(--ion-color-medium);"></ion-icon>
+        <h2>No Data Available</h2>
+        <p>Start tracking your exercises in Tab 1 to see your report.</p>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Exercise History List -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Exercise History</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <!-- Loading State -->
+      <div *ngIf="loadingHistory" class="ion-text-center">
+        <ion-spinner></ion-spinner>
+        <p>Loading exercise history...</p>
+      </div>
+
+      <!-- Exercise List -->
+      <ion-list *ngIf="!loadingHistory && exercises.length > 0">
+        <ion-item *ngFor="let exercise of exercises" lines="full">
+          <ion-label>
+            <h2>
+              <ion-icon
+                [name]="getExerciseIcon(exercise.type)"
+                style="vertical-align: middle; margin-right: 8px;">
+              </ion-icon>
+              <strong>{{ exercise.type }}</strong>
+            </h2>
+            <p>
+              <ion-text color="medium">
+                <ion-icon name="time-outline" style="vertical-align: middle;"></ion-icon>
+                Duration: {{ exercise.durationMinutes }} minutes
+              </ion-text>
+            </p>
+            <p>
+              <ion-text color="medium">
+                <ion-icon name="calendar-outline" style="vertical-align: middle;"></ion-icon>
+                {{ formatDate(exercise.occurredAt) }}
+              </ion-text>
+            </p>
+            <p>
+              <ion-text color="medium">
+                <ion-icon
+                  [name]="exercise.location === 'inside' ? 'home-outline' : 'sunny-outline'"
+                  style="vertical-align: middle;">
+                </ion-icon>
+                {{ exercise.location === 'inside' ? 'Inside' : 'Outside' }}
+              </ion-text>
+            </p>
+            <p>
+              <ion-text color="primary" style="font-size: 0.9em;">
+                <ion-icon name="globe-outline" style="vertical-align: middle;"></ion-icon>
+                Zone: {{ selectedTimezone }}
+              </ion-text>
+            </p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+
+      <!-- Empty State -->
+      <div *ngIf="!loadingHistory && exercises.length === 0" class="ion-text-center">
+        <ion-icon name="fitness-outline" style="font-size: 64px; color: var(--ion-color-medium);"></ion-icon>
+        <h2>No Exercise Records Found</h2>
+        <p>Add some exercises in Tab 1 to see them here.</p>
+      </div>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

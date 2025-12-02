@@ -1,0 +1,138 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/shop"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Product Details</ion-title>
+    <ion-badge slot="end" color="warning" style="margin-right: 16px; font-size: 14px; padding: 8px 12px; border-radius: 20px;">
+      >� {{ userPoints }} Points
+    </ion-badge>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div *ngIf="loading" style="display: flex; justify-content: center; align-items: center; height: 100%;">
+    <ion-spinner></ion-spinner>
+  </div>
+
+  <div *ngIf="!loading && item">
+    <!-- Product Image -->
+    <div style="position: relative; width: 100%; height: 300px; overflow: hidden;">
+      <img *ngIf="item.imageUrl"
+           [src]="item.imageUrl"
+           alt="{{ item.name }}"
+           style="width: 100%; height: 100%; object-fit: cover;"
+           (error)="$any($event.target).src='https://via.placeholder.com/800x300?text=No+Image'" />
+      <img *ngIf="!item.imageUrl"
+           src="https://via.placeholder.com/800x300?text={{ item.name }}"
+           alt="{{ item.name }}"
+           style="width: 100%; height: 100%; object-fit: cover;" />
+    </div>
+
+    <!-- Product Info Card -->
+    <ion-card style="margin-top: 0; border-radius: 20px 20px 0 0; margin-bottom: 0;">
+      <ion-card-header>
+        <ion-card-title style="font-size: 24px; font-weight: bold;">{{ item.name }}</ion-card-title>
+        <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+          <ion-badge color="success" style="padding: 8px 12px; font-size: 16px;">
+            {{ item.pointsRequired }} Points
+          </ion-badge>
+          <ion-badge color="medium" style="padding: 8px 12px;">
+            Stock: {{ item.stock }}
+          </ion-badge>
+        </div>
+      </ion-card-header>
+
+      <ion-card-content>
+        <p style="font-size: 16px; line-height: 1.6; color: #666;">{{ item.description }}</p>
+
+        <!-- Like & Review Stats -->
+        <div style="display: flex; gap: 20px; margin-top: 20px; padding-top: 16px; border-top: 1px solid #eee;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <ion-icon name="heart" style="color: #eb445a; font-size: 20px;"></ion-icon>
+            <span style="color: #666;">{{ likeCount }} likes</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <ion-icon name="chatbubble-outline" style="color: #3880ff; font-size: 20px;"></ion-icon>
+            <span style="color: #666;">{{ reviews.length }} reviews</span>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display: flex; gap: 12px; margin-top: 20px;">
+          <ion-button
+            expand="block"
+            style="flex: 0.3;"
+            [fill]="isLiked ? 'solid' : 'outline'"
+            [color]="isLiked ? 'danger' : 'medium'"
+            (click)="toggleLike()">
+            <ion-icon slot="start" [name]="isLiked ? 'heart' : 'heart-outline'"></ion-icon>
+            {{ isLiked ? 'Liked' : 'Like' }}
+          </ion-button>
+
+          <ion-button
+            expand="block"
+            style="flex: 0.7;"
+            (click)="addToCart(item)"
+            [disabled]="!canAfford(item) || item.stock === 0">
+            <ion-icon slot="start" name="add-circle"></ion-icon>
+            <span *ngIf="canAfford(item) && item.stock > 0">Add to Cart</span>
+            <span *ngIf="!canAfford(item) && item.stock > 0">Not Enough Points</span>
+            <span *ngIf="item.stock === 0">Out of Stock</span>
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Reviews Section -->
+    <ion-card style="margin-top: 16px;">
+      <ion-card-header>
+        <ion-card-title style="font-size: 20px;">Reviews ({{ reviews.length }})</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <!-- Add Review -->
+        <div style="margin-bottom: 20px;">
+          <ion-item lines="none" style="--background: #f5f5f5; border-radius: 12px;">
+            <ion-textarea
+              [(ngModel)]="newReviewText"
+              placeholder="Write a review..."
+              rows="3"
+              style="font-size: 14px;">
+            </ion-textarea>
+          </ion-item>
+          <ion-button
+            expand="block"
+            (click)="addReview()"
+            [disabled]="!newReviewText.trim()"
+            style="margin-top: 8px;">
+            <ion-icon slot="start" name="send-outline"></ion-icon>
+            Post Review
+          </ion-button>
+        </div>
+
+        <!-- Reviews List -->
+        <ion-list *ngIf="reviews.length > 0" style="background: transparent;">
+          <ion-item *ngFor="let review of reviews" lines="none" style="--background: transparent; margin-bottom: 16px;">
+            <div style="width: 100%;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <strong style="color: #3880ff;">{{ review.userName }}</strong>
+                <span style="font-size: 12px; color: #999;">{{ getTimeAgo(review.createdAt) }}</span>
+              </div>
+              <p style="margin: 0; color: #333; line-height: 1.5;">{{ review.reviewText }}</p>
+            </div>
+          </ion-item>
+        </ion-list>
+
+        <div *ngIf="reviews.length === 0" style="text-align: center; padding: 40px 20px; color: #999;">
+          <ion-icon name="chatbubble-outline" style="font-size: 60px; opacity: 0.3; margin-bottom: 12px;"></ion-icon>
+          <p>No reviews yet. Be the first to review!</p>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

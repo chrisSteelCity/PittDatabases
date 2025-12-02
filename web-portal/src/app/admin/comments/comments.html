@@ -1,0 +1,92 @@
+<div class="comments-container">
+  <div class="header">
+    <h2>💬 Comments Management</h2>
+    <p class="subtitle">View and manage all user comments on shop items</p>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="filters-section">
+    <div class="filter-group">
+      <label for="itemFilter">Filter by Product:</label>
+      <select id="itemFilter" [(ngModel)]="selectedItemId" (change)="onFilterChange()">
+        <option [value]="null">All Products</option>
+        <option *ngFor="let item of shopItems" [value]="item.id">{{ item.name }}</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="searchFilter">Search:</label>
+      <input
+        type="text"
+        id="searchFilter"
+        [(ngModel)]="searchText"
+        (input)="onFilterChange()"
+        placeholder="Search by username, product, or comment text..."
+      />
+    </div>
+
+    <button class="btn-clear" (click)="clearFilters()">Clear Filters</button>
+  </div>
+
+  <!-- Statistics -->
+  <div class="stats-section">
+    <div class="stat-card">
+      <div class="stat-value">{{ allComments.length }}</div>
+      <div class="stat-label">Total Comments</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ filteredComments.length }}</div>
+      <div class="stat-label">Filtered Results</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ shopItems.length }}</div>
+      <div class="stat-label">Products with Comments</div>
+    </div>
+  </div>
+
+  <!-- Comments List -->
+  <div class="comments-list">
+    <div *ngIf="filteredComments.length === 0" class="no-comments">
+      <p>No comments found</p>
+    </div>
+
+    <div *ngFor="let comment of filteredComments" class="comment-card">
+      <div class="comment-header">
+        <div class="comment-info">
+          <span class="product-name">🛍️ {{ comment.shopItemName }}</span>
+          <span class="user-name">👤 {{ comment.userName }}</span>
+          <span class="comment-date">🕐 {{ formatDate(comment.createdAt) }}</span>
+        </div>
+        <button class="btn-delete" (click)="confirmDelete(comment)">🗑️ Delete</button>
+      </div>
+
+      <div class="comment-body">
+        <p class="comment-text">{{ comment.commentText }}</p>
+      </div>
+
+      <div class="comment-meta">
+        <span class="meta-item">Comment ID: #{{ comment.id }}</span>
+        <span class="meta-item">User ID: {{ comment.userId }}</span>
+        <span class="meta-item">Product ID: {{ comment.shopItemId }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div *ngIf="commentToDelete" class="modal-overlay" (click)="cancelDelete()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>Confirm Delete</h3>
+      <p>Are you sure you want to delete this comment?</p>
+
+      <div class="modal-comment-preview">
+        <strong>{{ commentToDelete.userName }}</strong> on <strong>{{ commentToDelete.shopItemName }}</strong>
+        <p>"{{ commentToDelete.commentText }}"</p>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="cancelDelete()">Cancel</button>
+        <button class="btn-confirm-delete" (click)="deleteComment()">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>

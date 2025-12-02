@@ -1,0 +1,7 @@
+{
+  "name": "userPortal",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

@@ -1,0 +1,48 @@
+<div class="main-layout">
+  <!-- Top Header with User Info -->
+  <div class="top-header">
+    <div class="header-left">
+      <h1>Admin Portal</h1>
+    </div>
+    <div class="header-right">
+      <span class="current-user">Current User: {{ currentUsername }}</span>
+    </div>
+  </div>
+
+  <div class="content-wrapper">
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+      <nav class="sidebar-nav">
+        <a [routerLink]="['/dashboard']" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">Dashboard</span>
+        </a>
+        <a [routerLink]="['/admin/shop-items']" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">🛍️</span>
+          <span class="nav-label">Shop Items</span>
+        </a>
+        <a [routerLink]="['/admin/orders']" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">📦</span>
+          <span class="nav-label">Orders</span>
+        </a>
+        <a [routerLink]="['/admin/users']" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">👥</span>
+          <span class="nav-label">Users</span>
+        </a>
+        <a [routerLink]="['/admin/comments']" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">💬</span>
+          <span class="nav-label">Comments</span>
+        </a>
+        <a (click)="logout()" class="nav-item logout-item">
+          <span class="nav-icon">🚪</span>
+          <span class="nav-label">Logout</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

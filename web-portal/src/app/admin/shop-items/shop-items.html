@@ -1,0 +1,148 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Shop Items Management</h1>
+    <button class="btn-create" (click)="openCreateModal()">Create New Item</button>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div *ngIf="message" class="message" [class.success]="messageType === 'success'" [class.error]="messageType === 'error'">
+    {{ message }}
+  </div>
+
+  <div class="table-container">
+    <table class="user-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Points Required</th>
+          <th>Stock</th>
+          <th>Status</th>
+          <th>Image URL</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of displayedItems" [class.hidden-item]="!item.isActive">
+          <td>{{ item.id }}</td>
+          <td>{{ item.name }}</td>
+          <td>{{ item.description }}</td>
+          <td>{{ item.pointsRequired }}</td>
+          <td>{{ item.stock }}</td>
+          <td>
+            <span class="status-badge" [class.active]="item.isActive" [class.hidden]="!item.isActive">
+              {{ item.isActive ? 'Visible' : 'Hidden' }}
+            </span>
+          </td>
+          <td class="image-url">{{ item.imageUrl }}</td>
+          <td>
+            <button class="btn-edit" (click)="openEditModal(item)">Edit</button>
+            <button *ngIf="item.isActive" class="btn-delete" (click)="hideItem(item)">Hide</button>
+            <button *ngIf="!item.isActive" class="btn-show" (click)="showItem(item)">Show</button>
+          </td>
+        </tr>
+        <tr *ngIf="displayedItems.length === 0">
+          <td colspan="8" class="no-data">No items found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination" *ngIf="totalPages > 0">
+    <button
+      class="pagination-btn"
+      (click)="previousPage()"
+      [disabled]="currentPage === 1">
+      Previous
+    </button>
+
+    <div class="page-numbers">
+      <button
+        *ngFor="let page of pageNumbers"
+        class="page-btn"
+        [class.active]="page === currentPage"
+        (click)="goToPage(page)">
+        {{ page }}
+      </button>
+    </div>
+
+    <button
+      class="pagination-btn"
+      (click)="nextPage()"
+      [disabled]="currentPage === totalPages">
+      Next
+    </button>
+  </div>
+
+  <div class="pagination-info" *ngIf="totalItems > 0">
+    Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to
+    {{ Math.min(currentPage * itemsPerPage, totalItems) }} of
+    {{ totalItems }} items
+  </div>
+</div>
+
+<!-- Modal for Create/Edit -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ isEditMode ? 'Edit Item' : 'Create New Item' }}</h2>
+      <button class="modal-close" (click)="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form (ngSubmit)="saveItem()">
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input
+            type="text"
+            id="name"
+            [(ngModel)]="currentItem.name"
+            name="name"
+            required>
+        </div>
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea
+            id="description"
+            [(ngModel)]="currentItem.description"
+            name="description"
+            rows="3"
+            required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="pointsRequired">Points Required</label>
+          <input
+            type="number"
+            id="pointsRequired"
+            [(ngModel)]="currentItem.pointsRequired"
+            name="pointsRequired"
+            min="0"
+            required>
+        </div>
+        <div class="form-group">
+          <label for="stock">Stock</label>
+          <input
+            type="number"
+            id="stock"
+            [(ngModel)]="currentItem.stock"
+            name="stock"
+            min="0"
+            required>
+        </div>
+        <div class="form-group">
+          <label for="imageUrl">Image URL</label>
+          <input
+            type="text"
+            id="imageUrl"
+            [(ngModel)]="currentItem.imageUrl"
+            name="imageUrl"
+            required>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="closeModal()">Cancel</button>
+          <button type="submit" class="btn-save">{{ isEditMode ? 'Update' : 'Create' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

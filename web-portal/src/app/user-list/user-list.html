@@ -1,0 +1,79 @@
+<div class="user-list-container">
+  <div class="user-list-header">
+    <button class="btn-back" (click)="goBack()">← Back to Dashboard</button>
+    <h1>User Exercise History</h1>
+  </div>
+
+  <!-- Last 7 Days Chart -->
+  <div class="chart-container">
+    <h2>Last 7 Days Exercise Duration</h2>
+    <div class="chart-wrapper">
+      <canvas #exerciseChart></canvas>
+    </div>
+  </div>
+
+  <!-- Exercise Records Table -->
+  <div class="table-container">
+    <h2>All Exercise Records</h2>
+    <table class="exercise-table">
+      <thead>
+        <tr>
+          <th>Date & Time</th>
+          <th>Exercise Type</th>
+          <th>Duration (min)</th>
+          <th>Location</th>
+          <th>Timezone</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let exercise of displayedExercises">
+          <td>{{ formatDateTimeInTimezone(exercise.occurredAt, exercise.timezone) }}</td>
+          <td>
+            <span class="exercise-type">
+              {{ getExerciseIcon(exercise.type) }} {{ exercise.type }}
+            </span>
+          </td>
+          <td>{{ exercise.durationMinutes }}</td>
+          <td>{{ exercise.location }}</td>
+          <td>{{ getTimezoneLabel(exercise.timezone) }}</td>
+        </tr>
+        <tr *ngIf="displayedExercises.length === 0">
+          <td colspan="5" class="no-data">No exercise records found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="totalPages > 0">
+    <button
+      class="pagination-btn"
+      (click)="previousPage()"
+      [disabled]="currentPage === 1">
+      Previous
+    </button>
+
+    <div class="page-numbers">
+      <button
+        *ngFor="let page of pageNumbers"
+        class="page-btn"
+        [class.active]="page === currentPage"
+        (click)="goToPage(page)">
+        {{ page }}
+      </button>
+    </div>
+
+    <button
+      class="pagination-btn"
+      (click)="nextPage()"
+      [disabled]="currentPage === totalPages">
+      Next
+    </button>
+  </div>
+
+  <div class="pagination-info" *ngIf="totalItems > 0">
+    Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to
+    {{ Math.min(currentPage * itemsPerPage, totalItems) }} of
+    {{ totalItems }} records
+  </div>
+</div>

@@ -557,7 +557,7 @@ Issues and Pull Requests are welcome!
 
 ## 📄 License
 
-MIT License.
+MIT License
 
 ## 📞 Contact
 
